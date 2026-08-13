@@ -1,5 +1,7 @@
 mod app;
 mod lox;
+mod scanner;
+mod token;
 
 use clap::Parser;
 use std::process::ExitCode;

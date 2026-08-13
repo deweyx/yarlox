@@ -1,3 +1,5 @@
+use crate::scanner;
+use crate::scanner::{Scanner, ScannerResult};
 use std::fs::File;
 use std::io::{BufReader, Read, Write};
 use std::process::ExitCode;
@@ -50,15 +52,21 @@ impl Lox {
             }
 
             if !line.trim().is_empty() {
-                Self::run(&line);
+                Self::run(&line).map_err(|e| format!("{e:?}"))?;
             }
-            self.had_error = false;
         }
         Ok(ExitCode::SUCCESS)
     }
 
-    pub fn run(line: &str) {
-        println!("{}", line);
+    pub fn run(source: &str) -> ScannerResult<()> {
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens()?;
+
+        // For now, just print the tokens.
+        for token in tokens {
+            println!("{token:?}");
+        }
+        Ok(())
     }
 }
 
