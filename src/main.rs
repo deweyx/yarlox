@@ -1,4 +1,5 @@
 mod app;
+mod lox;
 
 use clap::Parser;
 use std::process::ExitCode;
@@ -6,11 +7,10 @@ use std::process::ExitCode;
 #[derive(Debug, clap::Parser)]
 #[command(version)]
 pub struct Args {
-    #[clap(default_value = "-")]
-    filename: String,
+    filename: Option<String>,
 }
 
 fn main() -> Result<ExitCode, String> {
     let args = Args::parse();
-    app::run(&args)
+    app::run_app(&args)
 }
