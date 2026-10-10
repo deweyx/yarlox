@@ -44,15 +44,16 @@ impl Lox {
             flush()?;
 
             let mut line = String::new();
-            stdin
-                .read_line(&mut line)
+            stdin.read_line(&mut line)
                 .map_err(|_| "Unable to read from stdin")?;
             if line.is_empty() {
                 break;
             }
 
             if !line.trim().is_empty() {
-                Self::run(&line).map_err(|e| format!("{e:?}"))?;
+                if let Err(e) = Self::run(&line) {
+                    println!("{e:?}");
+                }
             }
         }
         Ok(ExitCode::SUCCESS)

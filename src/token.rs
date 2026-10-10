@@ -1,5 +1,6 @@
 use std::fmt::Display;
 use phf::phf_map;
+use yarlox_macro::{generate_ast};
 
 pub(crate) static KEYWORDS: phf::Map<&'static str, TokenType> = phf_map! {
     "and" => TokenType::AND,
@@ -85,7 +86,6 @@ impl Literal for &str {}
 pub struct Token<'a> {
     pub token_type: TokenType<'a>,
     pub lexeme: &'a str,
-    // pub literal: Option<Box<dyn Literal>>,
     pub line: usize,
 }
 
@@ -95,10 +95,6 @@ impl<'a> Display for Token<'a> {
             "{} {}",
             self.token_type,
             self.lexeme,
-            // self.literal
-            //     .as_ref()
-            //     .map(|l| l.as_ref().to_string())
-            //     .unwrap_or("".into())
         ))
     }
 }
@@ -107,14 +103,18 @@ impl<'a> Token<'a> {
     pub fn new(
         token_type: TokenType<'a>,
         lexeme: &'a str,
-        // literal: Option<Box<dyn Literal>>,
         line: usize,
     ) -> Self {
         Self {
             token_type,
             lexeme,
-            // literal,
             line,
         }
     }
 }
+
+#[generate_ast(
+    Binary with left: Box<Self>, operator: Token<'a>, right: Box<Self>;
+    Grouping with expression: Box<Self>;
+)]
+trait Expr {}

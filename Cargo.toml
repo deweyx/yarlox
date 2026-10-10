@@ -9,11 +9,13 @@ members = ["crates/*"]
 
 [workspace.dependencies]
 yarlox-scanner.path = "./crates/scanner"
+yarlox-macro.path = "./crates/yarlox-macro"
 clap = { version = "4.5.61", features = ["derive"] }
 phf = { version = "0.14.0", features = ["macros"] }
 
 [dependencies]
 yarlox-scanner.workspace = true
+yarlox-macro.workspace = true
 clap.workspace = true
 unicode-segmentation = "1.13.3"
 phf.workspace = true

@@ -30,7 +30,7 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    pub fn scan_tokens(&'a mut self) -> ScannerResult<&'a Vec<Token>> {
+    pub fn scan_tokens(&'a mut self) -> ScannerResult<&'a Vec<Token<'a>>> {
         while !self.is_at_end() {
             self.start = self.current;
             self.scan_token()?;
