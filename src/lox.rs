@@ -1,4 +1,3 @@
-use crate::scanner;
 use crate::scanner::{Scanner, ScannerResult};
 use std::fs::File;
 use std::io::{BufReader, Read, Write};

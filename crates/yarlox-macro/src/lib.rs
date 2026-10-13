@@ -2,43 +2,37 @@ mod parser;
 mod lifetime_visitor;
 
 use crate::parser::MacroArgs;
-use quote::quote;
-use syn::ItemTrait;
+use quote::{quote, ToTokens};
+use syn::{parse_quote, ItemEnum, Lifetime};
 use syn::parse_macro_input;
 use crate::lifetime_visitor::extract_lifetimes;
 
 #[proc_macro_attribute]
 pub fn generate_ast(attr: proc_macro::TokenStream, item: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(item as ItemTrait);
-    let mut struct_idents: MacroArgs = parse_macro_input!(attr);
-    let trait_name = &input.ident;
-    let impls = struct_idents.structs.iter_mut().map(|s| {
+    let mut input = parse_macro_input!(item as ItemEnum);
+    let struct_spec: MacroArgs = parse_macro_input!(attr);
+
+    struct_spec.structs.iter().for_each(|s| {
         let ty = &s.name;
-        let field_names = s.fields.iter().map(|f| &f.name);
+        let field_names: Vec<_> = s.fields.iter().map(|f| &f.name).collect();
         let field_types: Vec<_> = s.fields.iter().map(|f| &f.ty).collect();
 
-        let mut alias = quote!();
-        let mut where_clause = quote!();
-        let mut generics = quote!();
-        if s.is_self_referential {
-            alias = quote!(__alias);
-            where_clause = quote!(where #alias : #trait_name)
-        };
         let lifetimes = extract_lifetimes(&field_types);
-        if s.is_self_referential | !lifetimes.is_empty() { generics = quote!(<#lifetimes #alias>); };
 
-        quote! {
-            struct #ty #generics #where_clause {
-                #(#field_names: #field_types),*
+        input.variants.push(parse_quote! {
+            #ty { #(#field_names: #field_types),* }
+        });
+        lifetimes.into_iter().for_each(|l| {
+            eprintln!("** {}", l.to_token_stream().to_string());
+            let lifetime: Lifetime = parse_quote!(#l);
+            if !input.generics.lifetimes().any(|check| check.lifetime == lifetime) {
+                input.generics.params.insert(0, parse_quote!(#l))
             }
-            impl #generics #trait_name for #ty #generics #where_clause { }
-        }
+        });
+
     });
 
-    let expanded = quote! {
-        #input
-        #(#impls)*
-    };
+    eprintln!("{}", input.to_token_stream().to_string());
 
-    proc_macro::TokenStream::from(expanded)
+    proc_macro::TokenStream::from(quote!{#input})
 }

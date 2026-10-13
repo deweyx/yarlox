@@ -11,7 +11,7 @@ pub enum ScannerError {
 
 pub struct Scanner<'a> {
     pub source: &'a str,
-    pub tokens: Vec<Token<'a>>,
+    pub tokens: Vec<Token>,
     pub start: usize,
     pub current: usize,
     pub line: usize,
@@ -30,7 +30,7 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    pub fn scan_tokens(&'a mut self) -> ScannerResult<&'a Vec<Token<'a>>> {
+    pub fn scan_tokens(&'a mut self) -> ScannerResult<&'a Vec<Token>> {
         while !self.is_at_end() {
             self.start = self.current;
             self.scan_token()?;
@@ -82,9 +82,9 @@ impl<'a> Scanner<'a> {
         result
     }
 
-    fn add_token(&mut self, token_type: TokenType<'a>) {
+    fn add_token(&mut self, token_type: TokenType) {
         let value = Self::chars(self.source, self.start, self.current);
-        self.tokens.push(Token::new(token_type, value, self.line));
+        self.tokens.push(Token::new(token_type, value.into(), self.line));
     }
 
     fn matches(&mut self, expected: char) -> bool {
@@ -141,7 +141,7 @@ impl<'a> Scanner<'a> {
         self.advance();
 
         let value = Self::chars(self.source, self.start, self.current);
-        self.add_token(TokenType::STRING(value));
+        self.add_token(TokenType::STRING(value.into()));
         Ok(())
     }
 
@@ -151,7 +151,7 @@ impl<'a> Scanner<'a> {
         if let Some(v) = token::KEYWORDS.get(value) {
             self.add_token(v.clone());
         } else  {
-            self.add_token(TokenType::IDENTIFIER(value));
+            self.add_token(TokenType::IDENTIFIER(value.into()));
         }
         Ok(())
     }
@@ -180,18 +180,18 @@ mod tests {
         let mut s = Scanner::new(code);
         let tokens = s.scan_tokens().expect("Test failed");
         assert_eq!(*tokens, vec![
-            Token::new(TokenType::FUN, "fun", 1),
-            Token::new(TokenType::IDENTIFIER("HelloWorld"), "HelloWorld", 1),
-            Token::new(TokenType::LEFT_PAREN, "(", 1),
-            Token::new(TokenType::RIGHT_PAREN, ")", 1),
-            Token::new(TokenType::LEFT_BRACE, "{", 1),
-            Token::new(TokenType::PRINT, "print", 2),
-            Token::new(TokenType::LEFT_PAREN, "(", 2),
-            Token::new(TokenType::STRING("\"Hello\""), "\"Hello\"", 2),
-            Token::new(TokenType::RIGHT_PAREN, ")", 2),
-            Token::new(TokenType::SEMICOLON, ";", 2),
-            Token::new(TokenType::RIGHT_BRACE, "}", 3),
-            Token::new(TokenType::EOF, "", 3),
+            Token::new(TokenType::FUN, "fun".into(), 1),
+            Token::new(TokenType::IDENTIFIER("HelloWorld".into()), "HelloWorld".into(), 1),
+            Token::new(TokenType::LEFT_PAREN, "(".into(), 1),
+            Token::new(TokenType::RIGHT_PAREN, ")".into(), 1),
+            Token::new(TokenType::LEFT_BRACE, "{".into(), 1),
+            Token::new(TokenType::PRINT, "print".into(), 2),
+            Token::new(TokenType::LEFT_PAREN, "(".into(), 2),
+            Token::new(TokenType::STRING("\"Hello\"".into()), "\"Hello\"".into(), 2),
+            Token::new(TokenType::RIGHT_PAREN, ")".into(), 2),
+            Token::new(TokenType::SEMICOLON, ";".into(), 2),
+            Token::new(TokenType::RIGHT_BRACE, "}".into(), 3),
+            Token::new(TokenType::EOF, "".into(), 3),
         ]);
     }
 
@@ -202,8 +202,8 @@ mod tests {
         let tokens = s.scan_tokens().expect("Test failed");
         assert_eq!(*tokens, vec![
             Token::new(TokenType::BANG_EQUAL, "!=".into(), 1),
-            Token::new(TokenType::STRING("\"hello\""), "\"hello\"".into(), 1),
-            Token::new(TokenType::EOF, "", 1),
+            Token::new(TokenType::STRING("\"hello\"".into()), "\"hello\"".into(), 1),
+            Token::new(TokenType::EOF, "".into(), 1),
         ]);
     }
 
@@ -214,8 +214,8 @@ mod tests {
         let tokens = s.scan_tokens().expect("Test failed");
         assert_eq!(*tokens, vec![
             Token::new(TokenType::BANG_EQUAL, "!=".into(), 1),
-            Token::new(TokenType::NUMBER(3.1), "3.1", 1),
-            Token::new(TokenType::EOF, "", 1),
+            Token::new(TokenType::NUMBER(3.1), "3.1".into(), 1),
+            Token::new(TokenType::EOF, "".into(), 1),
         ]);
     }
 

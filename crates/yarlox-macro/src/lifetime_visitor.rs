@@ -1,5 +1,4 @@
-use proc_macro2::{Span, TokenStream};
-use quote::quote;
+use proc_macro2::Span;
 use std::collections::BTreeSet;
 use syn::visit::Visit;
 use syn::{Lifetime, Type};
@@ -18,7 +17,7 @@ impl<'a> Visit<'a> for LifetimeVisitor {
     }
 }
 
-pub fn extract_lifetimes(types: &Vec<&Type>) -> TokenStream {
+pub fn extract_lifetimes(types: &Vec<&Type>) -> Vec<Lifetime> {
     let mut visitor = LifetimeVisitor::default();
     for ty in types {
         visitor.visit_type(ty);
@@ -26,9 +25,5 @@ pub fn extract_lifetimes(types: &Vec<&Type>) -> TokenStream {
     let lifetime_tokens = visitor.lifetimes.iter().map(|name| {
         Lifetime::new(&format!("{}", name), Span::call_site())
     });
-    if visitor.lifetimes.is_empty() {
-        quote! {}
-    } else {
-        quote! { #(#lifetime_tokens,)* }
-    }
+    lifetime_tokens.collect()
 }

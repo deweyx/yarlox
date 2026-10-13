@@ -1,6 +1,5 @@
 use std::fmt::Display;
 use phf::phf_map;
-use yarlox_macro::{generate_ast};
 
 pub(crate) static KEYWORDS: phf::Map<&'static str, TokenType> = phf_map! {
     "and" => TokenType::AND,
@@ -23,7 +22,7 @@ pub(crate) static KEYWORDS: phf::Map<&'static str, TokenType> = phf_map! {
 
 #[allow(non_camel_case_types, unused)]
 #[derive(Clone, Debug, PartialEq)]
-pub enum TokenType<'a> {
+pub enum TokenType {
     // Single-character tokens.
     LEFT_PAREN,
     RIGHT_PAREN,
@@ -48,8 +47,8 @@ pub enum TokenType<'a> {
     LESS_EQUAL,
 
     // Literals.
-    IDENTIFIER(&'a str),
-    STRING(&'a str),
+    IDENTIFIER(String),
+    STRING(String),
     NUMBER(f32),
 
     // Keywords.
@@ -73,7 +72,7 @@ pub enum TokenType<'a> {
     EOF,
 }
 
-impl<'a> Display for TokenType<'a> {
+impl<'a> Display for TokenType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{self:?}",)
     }
@@ -82,14 +81,14 @@ impl<'a> Display for TokenType<'a> {
 pub trait Literal: Display {}
 impl Literal for &str {}
 
-#[derive(Debug, PartialEq)]
-pub struct Token<'a> {
-    pub token_type: TokenType<'a>,
-    pub lexeme: &'a str,
+#[derive(Clone, Debug, PartialEq)]
+pub struct Token {
+    pub token_type: TokenType,
+    pub lexeme: String,
     pub line: usize,
 }
 
-impl<'a> Display for Token<'a> {
+impl Display for Token {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!(
             "{} {}",
@@ -99,10 +98,10 @@ impl<'a> Display for Token<'a> {
     }
 }
 
-impl<'a> Token<'a> {
+impl Token {
     pub fn new(
-        token_type: TokenType<'a>,
-        lexeme: &'a str,
+        token_type: TokenType,
+        lexeme: String,
         line: usize,
     ) -> Self {
         Self {
@@ -112,9 +111,3 @@ impl<'a> Token<'a> {
         }
     }
 }
-
-#[generate_ast(
-    Binary with left: Box<Self>, operator: Token<'a>, right: Box<Self>;
-    Grouping with expression: Box<Self>;
-)]
-trait Expr {}
