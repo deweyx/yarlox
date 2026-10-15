@@ -117,17 +117,18 @@ impl Parser {
                 value: Literal::Numeric(n),
             }),
             TokenType::LEFT_PAREN => {
+                self.advance();
                 let expression = Box::new(self.expression()?);
                 self.consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.")?;
                 Some(Expr::Grouping { expression })
             }
             _ => None,
         };
-        if let Some(_) = result {
-            self.advance();
-        }
 
         if let Some(expr) = result {
+            if !matches!(expr, Expr::Grouping { .. }) {
+                self.advance();
+            }
             Ok(expr)
         } else {
             Err(ParserError::Message(
