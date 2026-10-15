@@ -1,4 +1,6 @@
+use std::fmt;
 use yarlox_macro::generate_ast;
+use crate::printer::AstPrinter;
 use crate::token::Token;
 
 pub type BoxExpr = Box<Expr>;
@@ -17,7 +19,7 @@ pub enum Literal {
     True,
     False,
     Nil,
-    Numeric(f32),
+    Number(f32),
     String(String),
 }
 
@@ -25,9 +27,16 @@ impl Expr {
     pub fn accept<R, V: Visitor<R>>(&self, visitor: &V) -> R {
         visitor.visit(self)
     }
-    
+
     pub fn accept_mut<R, V: VisitorMut<R>>(&self, visitor: &mut V) -> R {
         visitor.visit_mut(self)
+    }
+}
+
+impl fmt::Display for Expr {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let printer = AstPrinter;
+        write!(f, "{}", printer.print(self))
     }
 }
 

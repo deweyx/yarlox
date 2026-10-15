@@ -14,7 +14,7 @@ impl Visitor<String> for AstPrinter {
 }
 
 impl AstPrinter {
-    pub fn print(&mut self, expr: &Expr) -> String {
+    pub fn print(&self, expr: &Expr) -> String {
         expr.accept(self)
     }
 

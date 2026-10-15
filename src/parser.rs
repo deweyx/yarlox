@@ -104,18 +104,11 @@ impl Parser {
     fn primary(&mut self) -> ExprResult {
         let token = { self.peek().clone() };
         let result = match token.token_type {
-            TokenType::FALSE => Some(Expr::Literal {
-                value: Literal::False,
-            }),
-            TokenType::TRUE => Some(Expr::Literal {
-                value: Literal::True,
-            }),
-            TokenType::STRING(s) => Some(Expr::Literal {
-                value: Literal::String(s),
-            }),
-            TokenType::NUMBER(n) => Some(Expr::Literal {
-                value: Literal::Numeric(n),
-            }),
+            TokenType::FALSE => Some(Expr::Literal { value: Literal::False, }),
+            TokenType::TRUE => Some(Expr::Literal { value: Literal::True, }),
+            TokenType::NIL => Some(Expr::Literal { value: Literal::Nil }),
+            TokenType::STRING(s) => Some(Expr::Literal { value: Literal::String(s), }),
+            TokenType::NUMBER(n) => Some(Expr::Literal { value: Literal::Number(n), }),
             TokenType::LEFT_PAREN => {
                 self.advance();
                 let expression = Box::new(self.expression()?);
@@ -184,15 +177,12 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let code = r#"8 == 3 + 5; 8 == 3 + 5 + 7"#;
+        let code = r#"16 == 2 * (3 + 5); 8 != 3 + 5 + 7"#;
         let mut s = Scanner::new(code);
         let tokens = s.scan_tokens().expect("Test failed");
         let mut parser = Parser::new(tokens.clone());
         let expr = parser.parse().unwrap();
 
-        let mut printer = crate::printer::AstPrinter {};
-        let result = printer.print(&expr);
-
-        assert_eq!("(== Numeric(8.0) (+ Numeric(3.0) Numeric(5.0)))", result);
+        assert_eq!("(== Number(16.0) (* Number(2.0) (group (+ Number(3.0) Number(5.0)))))", format!("{expr}"));
     }
 }
