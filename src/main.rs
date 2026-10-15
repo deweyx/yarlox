@@ -4,6 +4,7 @@ mod scanner;
 mod token;
 mod parser;
 mod expression;
+mod printer;
 
 use clap::Parser;
 use std::process::ExitCode;

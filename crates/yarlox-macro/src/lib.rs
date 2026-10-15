@@ -23,7 +23,6 @@ pub fn generate_ast(attr: proc_macro::TokenStream, item: proc_macro::TokenStream
             #ty { #(#field_names: #field_types),* }
         });
         lifetimes.into_iter().for_each(|l| {
-            eprintln!("** {}", l.to_token_stream().to_string());
             let lifetime: Lifetime = parse_quote!(#l);
             if !input.generics.lifetimes().any(|check| check.lifetime == lifetime) {
                 input.generics.params.insert(0, parse_quote!(#l))
@@ -31,8 +30,6 @@ pub fn generate_ast(attr: proc_macro::TokenStream, item: proc_macro::TokenStream
         });
 
     });
-
-    eprintln!("{}", input.to_token_stream().to_string());
 
     proc_macro::TokenStream::from(quote!{#input})
 }
